@@ -32,6 +32,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "GameMode")
 	AGenerator* Generator;
 
+	UPROPERTY(VisibleAnywhere, Category = "GameMode")
+	AAlgorithmBSP* Algorithm;
+
 	UPROPERTY(VisibleAnywhere, Category="GameMode")
 	bool isGenData;
 };

@@ -8,6 +8,16 @@ AVisualBox::AVisualBox()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	RootComponent = BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));	
+}
+
+void AVisualBox::Initialize(float LengthX, float LengthY, float OutCenterX, float OutCenterY, AVisualBox* Parent)
+{
+	HalfLengthX = LengthX / 2;
+	HalfLengthY = LengthY / 2;
+	CenterX = OutCenterX;
+	CenterY = OutCenterY;
+	BoxParent = Parent;
+
 	BoxComponent->SetBoxExtent(FVector(HalfLengthX, HalfLengthY, 0));
 	BoxComponent->SetWorldLocation(FVector(CenterX, CenterY, 0));
 }
@@ -72,6 +82,11 @@ float AVisualBox::getLeftBounder()
 float AVisualBox::getBottomBounder()
 {
 	return CenterY - HalfLengthY;
+}
+
+void AVisualBox::addChild(AVisualBox * box)
+{
+	ChildBoxes.Add(box);
 }
 
 

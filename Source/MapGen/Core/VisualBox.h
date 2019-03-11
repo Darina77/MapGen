@@ -16,6 +16,7 @@ class MAPGEN_API AVisualBox : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AVisualBox();
+	void Initialize(float LengthX, float LengthY, float OutCenterX, float OutCenterY, AVisualBox* Parent = nullptr);
 
 protected:
 	// Called when the game starts or when spawned
@@ -40,6 +41,7 @@ public:
 	float getLeftBounder();
 	// Give the extents of bottom bounder of section
 	float getBottomBounder();
+	void addChild(AVisualBox* box);
 private:
 	//Painted the section bounds
 	UPROPERTY(EditAnywhere, Category = "VisualBox")
@@ -61,5 +63,5 @@ private:
 	TArray<AVisualBox*> ChildBoxes;
 	//The parent of this section
 	UPROPERTY(EditAnywhere, Category = "VisualBox")
-	AVisualBox* Parent;
+	AVisualBox* BoxParent;
 };

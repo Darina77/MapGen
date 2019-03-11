@@ -8,8 +8,15 @@ void AMapGenGameModeBase::BeginPlay()
 	if (isGenData)
 	{
 		MainStream.Initialize(GenData->GetRandomSeed());
+		
+	
+		Algorithm = GetWorld()->SpawnActor<AAlgorithmBSP>(FVector(0, 0, 0), FRotator::ZeroRotator);
+		Algorithm->Initialize(GenData);
+		Algorithm->Go();
+		
 		Generator = GetWorld()->SpawnActor<AGenerator>(FVector(50, 50, 0), FRotator::ZeroRotator);
-		Generator->Initialize(GenData->GetRootSizeX(), GenData->GetRootSizeY(), GenData->GetRandomSeed(), GenData->GetMaxSubRooms());
+		Generator->Initialize(GenData, Algorithm);
+		Generator->Generate();
 	}
 }
 

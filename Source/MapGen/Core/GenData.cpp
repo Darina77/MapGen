@@ -40,7 +40,12 @@ int AGenData::GetRandomSeed()
 	return RandomSeed;
 }
 
-int AGenData::GetMaxSubRooms()
+int AGenData::GetMinSubRoomSize()
 {
-	return MaxSubRooms;
+	return MinSubRoomSize;
+}
+
+int AGenData::GetBorderSize()
+{
+	return BorderSize;
 }

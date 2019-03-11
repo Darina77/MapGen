@@ -26,7 +26,8 @@ public:
 	float GetRootSizeX();
 	float GetRootSizeY();
 	int GetRandomSeed();
-	int GetMaxSubRooms();
+	int GetMinSubRoomSize();
+	int GetBorderSize();
 private:
 	UPROPERTY(Instanced)
 		UBoxComponent* BoxComponent;
@@ -38,5 +39,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "GenData")
 		int RandomSeed;
 	UPROPERTY(EditAnywhere, Category = "GenData")
-		int MaxSubRooms;
+		int MinSubRoomSize;
+	UPROPERTY(EditAnywhere, Category = "GenData")
+		int BorderSize;
 };
