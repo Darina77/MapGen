@@ -62,58 +62,53 @@ void AGenerator::GenerateWalls(AVisualBox* section)
 	
 	for (float j = left; j < rigth; j += step)
 	{
-		FVector vector_top(top, j, 0);
-		FVector vector_bottom(bottom, j, 0);
-		//UE_LOG(LogTemp, Log, TEXT("Place x - %f, y - %f"), top, j);
-		//UE_LOG(LogTemp, Log, TEXT("Place x - %f, y - %f"), left, j);
+		FVector vector_top(top, j, 0.f);
+		FVector vector_bottom(bottom, j, 0.f);
 
 		FVector scale;
 		if (j + step > rigth)
 		{
-			scale.X = border/10.0;
-			scale.Y = (rigth - j)/step;
-			scale.Z = 1.0;
-			UE_LOG(LogTemp, Log, TEXT("Scale y %f"), scale.Y);
+			scale.X = border/10.f;
+			scale.Y = (rigth - j)/ step;
+			scale.Z = 1.f;
 			j = rigth;
 		}
 		else {
-			scale.X = border / 10.0;;
-			scale.Y = 1.0;
-			scale.Z = 1.0;
+			scale.X = border/10.f;
+			scale.Y = 1.f;
+			scale.Z = 1.f;
 		}
 
 		AWall* wall_top = GetWorld()->SpawnActor<AWall>(vector_top, FRotator::ZeroRotator);
 		wall_top->Init(vector_top, scale);
 
 		AWall* wall_bottom = GetWorld()->SpawnActor<AWall>(vector_bottom, FRotator::ZeroRotator);
-		step = wall_bottom->Init(vector_bottom, scale).Y*2.0;
+		step = wall_bottom->Init(vector_bottom, scale).Y*2.f;
 	}
 
 	for (float i = bottom; i < top; i += step)
 	{
-		FVector vector_right(i, rigth, 0.0);
-		FVector vector_left(i, left, 0.0);
+		FVector vector_right(i, rigth, 0.f);
+		FVector vector_left(i, left, 0.f);
 		FVector scale;
 		if (i + step > top)
 		{
 			scale.X = (top - i) / step;
-			scale.Y = border / 10.0;
-			scale.Z = 1.0;
-			UE_LOG(LogTemp, Log, TEXT("Scale x %f"), scale.X);
+			scale.Y = border/10.f;
+			scale.Z = 1.f;
 			i = top;
 		}
 		else {
-			scale.X = 1.0;
-			scale.Y = border / 10.0;
-			scale.Z = 1.0;
+			scale.X = 1.f;
+			scale.Y = border/10.f;
+			scale.Z = 1.f;
 		}
-		//UE_LOG(LogTemp, Log, TEXT("Place x - %f, y - %f"), i, rigth);
-		//UE_LOG(LogTemp, Log, TEXT("Place x - %f, y - %f"), i, left);
+	
 		AWall* wall_right = GetWorld()->SpawnActor<AWall>(vector_right, FRotator::ZeroRotator);
 		wall_right->Init(vector_right, scale);
 
 		AWall* wall_left = GetWorld()->SpawnActor<AWall>(vector_left, FRotator::ZeroRotator);
-		step = wall_left->Init(vector_left, scale).X * 2.0;
+		step = wall_left->Init(vector_left, scale).X * 2.f;
 	}
 	
 	

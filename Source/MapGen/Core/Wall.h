@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/BoxComponent.h"
+#include "Engine/StaticMesh.h"
 #include "Wall.generated.h"
 
 UCLASS()
@@ -24,7 +25,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	FVector Init(FVector vector, FVector scale);
+	FVector Init(FVector& vector, FVector& scale);
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Floor", meta = (AllowPrivateAccess = "true"))
 		UStaticMesh* WallMesh;

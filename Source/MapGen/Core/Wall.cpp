@@ -24,33 +24,23 @@ void AWall::Tick(float DeltaTime)
 
 }
 
-FVector AWall::Init(FVector vector, FVector scale)
+FVector AWall::Init(FVector& vector, FVector& scale)
 {
 	WallMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
-	UInstancedStaticMeshComponent* pResult = NewObject<UInstancedStaticMeshComponent>(this, TEXT("Wall"));
-	pResult->RegisterComponent();
-	pResult->SetStaticMesh(WallMesh);
-	pResult->SetFlags(RF_Transactional);
-	this->AddInstanceComponent(pResult);
-	
+	FVector MeshExtend(WallMesh->GetBoundingBox().GetExtent());
+	MeshExtend *= scale;
 	BoxComponent->SetWorldScale3D(scale);
-	BoxComponent->SetWorldLocation(vector);
+	BoxComponent->SetWorldLocation((vector+MeshExtend));
+	BoxComponent->SetBoxExtent(MeshExtend);
 	
-	
-	FTransform transform(GetActorTransform());
-	pResult->AddInstance(transform);
-	
-	FVector MeshExtent = pResult->CalcBounds(transform).BoxExtent;
-	BoxComponent->SetBoxExtent(MeshExtent);
+	UInstancedStaticMeshComponent* pResult = NewObject<UInstancedStaticMeshComponent>(this, TEXT("Wall"));
+	pResult->SetStaticMesh(WallMesh);
+	pResult->bEditableWhenInherited = true;
+	pResult->bSelectable = true;
+	pResult->SetFlags(RF_Transactional);
+	pResult->RegisterComponent();
 
-	UE_LOG(LogTemp, Log, TEXT("Mesh extent %f %f %f"), MeshExtent.X, MeshExtent.Y, MeshExtent.Z);
-	vector.X += MeshExtent.X;
-	vector.Y += MeshExtent.Y;
-	vector.Z += MeshExtent.Z;
-	FVector in_vector(MeshExtent.X, MeshExtent.Y, MeshExtent.Z);
-	BoxComponent->SetWorldLocation(vector);
-	//pResult->SetRelativeLocation(in_vector);
-	//UE_LOG(LogTemp, Log, TEXT("Vector after %f %f"), vector.X, vector.Y);
-
-	return pResult->CalcBounds(transform).BoxExtent;
+	pResult->AddInstance(GetActorTransform());
+	
+	return MeshExtend;
 }
