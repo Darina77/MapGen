@@ -39,6 +39,8 @@ private:
 		AGenData* GenData;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Generator", meta = (AllowPrivateAccess = "true"))
 		AAlgorithmBSP* GenAlgorithm;
+
+	static const int TAIL_SIZE = 100;
 };
 
 
