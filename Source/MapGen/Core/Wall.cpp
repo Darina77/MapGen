@@ -24,15 +24,23 @@ void AWall::Tick(float DeltaTime)
 
 }
 
+void AWall::GetCurrentExtension(FVector& vector)
+{
+	vector = MeshExtension;
+}
+
 FVector AWall::Init(FVector& vector, FVector& scale)
 {
+	
 	WallMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
 	FVector MeshExtend(WallMesh->GetBoundingBox().GetExtent());
 	MeshExtend *= scale;
 	BoxComponent->SetWorldScale3D(scale);
 	BoxComponent->SetWorldLocation((vector+MeshExtend));
 	BoxComponent->SetBoxExtent(MeshExtend);
-	
+
+	UE_LOG(LogTemp, Log, TEXT("New Wall X - %f, Y - %f, Z - %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
+
 	UInstancedStaticMeshComponent* pResult = NewObject<UInstancedStaticMeshComponent>(this, TEXT("Wall"));
 	pResult->SetStaticMesh(WallMesh);
 	pResult->bEditableWhenInherited = true;
@@ -42,5 +50,6 @@ FVector AWall::Init(FVector& vector, FVector& scale)
 
 	pResult->AddInstance(GetActorTransform());
 	
+	MeshExtension = MeshExtend;
 	return MeshExtend;
 }

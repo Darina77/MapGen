@@ -11,7 +11,6 @@ AGenerator::AGenerator()
 	{
 		RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	}
-	
 }
 
 void AGenerator::SetAlgorithm(AAlgorithmBSP* Algorithm)
@@ -39,7 +38,7 @@ void AGenerator::Tick(float DeltaTime)
 
 void AGenerator::Generate()
 {
-	GenerateFloor();
+	//GenerateFloor();
 	TQueue<AVisualBox*>* AllSections = GenAlgorithm->GetAllSections();
 	while (!AllSections->IsEmpty())
 	{
@@ -50,68 +49,96 @@ void AGenerator::Generate()
 	}
 }
 
+void AGenerator::GenerateVerticalWalls(float left, float rigth, const float y)
+{
+	float border = GenData->GetBorderSize();
+	float step = 50.f;
+
+	for (float j = left; j < rigth; j += step)
+	{
+		FVector vector(j, y, 0.f);
+		FVector scale;
+		if (j + step > rigth)
+		{
+			scale.X = ((rigth - j) / step);
+			scale.Y = border / 10.f;
+			scale.Z = 1.f;
+			step = rigth - j;
+			j = rigth;
+		}
+		else 
+		{
+			scale.X = 1.f;
+			scale.Y = border / 10.f;
+			scale.Z = 1.f;
+		}
+
+		FVector chackPlaceTop((vector.X + step / 2), (vector.Y + 10), vector.Z);
+		AWall* collisionWall = NewObject<AWall>(this, TEXT("CollisionWall"));
+		if (!isWall(chackPlaceTop, &collisionWall)) {
+			AWall* wall = GetWorld()->SpawnActor<AWall>(vector, FRotator::ZeroRotator);
+			step = wall->Init(vector, scale).X * 2;
+		}
+		else 
+		{
+			UE_LOG(LogTemp, Log, TEXT("Skip Wall on verical X - %f, Y - %f, Z - %f"), chackPlaceTop.X, chackPlaceTop.Y, chackPlaceTop.Z);
+			FVector collisionExtend;
+			collisionWall->GetCurrentExtension(collisionExtend);
+			step = collisionExtend.X * 2;
+		}
+	}
+}
+
+void AGenerator::GenerateHorizontalWalls(float bottom, float top, const float x)
+{
+	float border = GenData->GetBorderSize();
+	float step = 50.f;
+	for (float i = bottom; i < top; i += step)
+	{
+		FVector vector(x, i, 0.f);
+		FVector scale;
+		if (i + step > top)
+		{
+			scale.X = border / 10.f;
+			scale.Y = ((top - i) / step);
+			scale.Z = 1.f;
+			step = top - i;
+			i = top;
+		}
+		else 
+		{
+			scale.X = border / 10.f;
+			scale.Y = 1.f;
+			scale.Z = 1.f;
+		}
+		FVector chackPlaceRight((vector.X + 10), (vector.Y + step / 2), vector.Z);
+		AWall* collisionWall = NewObject<AWall>(this, TEXT("CollisionWall"));
+		if (!isWall(chackPlaceRight, &collisionWall)) {
+			AWall* wall = GetWorld()->SpawnActor<AWall>(vector, FRotator::ZeroRotator);
+			step = wall->Init(vector, scale).Y *2;
+		}
+		else 
+		{
+			UE_LOG(LogTemp, Log, TEXT("Skip Wall on horiz X - %f, Y - %f, Z - %f"), chackPlaceRight.X, chackPlaceRight.Y, chackPlaceRight.Z);
+			FVector collisionExtend;
+			collisionWall->GetCurrentExtension(collisionExtend);
+			step = collisionExtend.Y * 2;
+		}
+	}
+}
+
 void AGenerator::GenerateWalls(AVisualBox* section)
 {
 	float top = section->getTopBounder();
 	float bottom = section->getBottomBounder();
-	float rigth = section->getRigthBounder();
+	float right = section->getRigthBounder();
 	float left = section->getLeftBounder();
-	float border = GenData->GetBorderSize();
-	UE_LOG(LogTemp, Log, TEXT("Generate Walls for Top - %f, Bottom - %f, Right - %f, Left - %f"), top, bottom, rigth, left);
-	float step = 50;
 	
-	for (float j = left; j < rigth; j += step)
-	{
-		FVector vector_top(top, j, 0.f);
-		FVector vector_bottom(bottom, j, 0.f);
-
-		FVector scale;
-		if (j + step > rigth)
-		{
-			scale.X = border/10.f;
-			scale.Y = (rigth - j)/ step;
-			scale.Z = 1.f;
-			j = rigth;
-		}
-		else {
-			scale.X = border/10.f;
-			scale.Y = 1.f;
-			scale.Z = 1.f;
-		}
-
-		AWall* wall_top = GetWorld()->SpawnActor<AWall>(vector_top, FRotator::ZeroRotator);
-		wall_top->Init(vector_top, scale);
-
-		AWall* wall_bottom = GetWorld()->SpawnActor<AWall>(vector_bottom, FRotator::ZeroRotator);
-		step = wall_bottom->Init(vector_bottom, scale).Y*2.f;
-	}
-
-	for (float i = bottom; i < top; i += step)
-	{
-		FVector vector_right(i, rigth, 0.f);
-		FVector vector_left(i, left, 0.f);
-		FVector scale;
-		if (i + step > top)
-		{
-			scale.X = (top - i) / step;
-			scale.Y = border/10.f;
-			scale.Z = 1.f;
-			i = top;
-		}
-		else {
-			scale.X = 1.f;
-			scale.Y = border/10.f;
-			scale.Z = 1.f;
-		}
-	
-		AWall* wall_right = GetWorld()->SpawnActor<AWall>(vector_right, FRotator::ZeroRotator);
-		wall_right->Init(vector_right, scale);
-
-		AWall* wall_left = GetWorld()->SpawnActor<AWall>(vector_left, FRotator::ZeroRotator);
-		step = wall_left->Init(vector_left, scale).X * 2.f;
-	}
-	
-	
+	UE_LOG(LogTemp, Log, TEXT("Generate Walls for Top - %f, Bottom - %f, Right - %f, Left - %f"), top, bottom, right, left);
+	GenerateVerticalWalls(left, right, top);
+	GenerateVerticalWalls(left, right, bottom);
+	GenerateHorizontalWalls(bottom, top, right);
+	GenerateHorizontalWalls(bottom, top, left);
 }
 
 void AGenerator::GenerateDoor(AVisualBox* section)
@@ -119,12 +146,13 @@ void AGenerator::GenerateDoor(AVisualBox* section)
 	
 }
 
+
 void AGenerator::GenerateFloor()
 {
-	float top = GenData->GetRootSizeX()/2;
-	float bottom = -GenData->GetRootSizeX()/2;
-	float rigth = GenData->GetRootSizeY()/2;
-	float left = -GenData->GetRootSizeY() / 2;
+	float top = GenData->GetRootSizeX() / 2.f;
+	float bottom = -GenData->GetRootSizeX() / 2.f;
+	float rigth = GenData->GetRootSizeY() / 2.f;
+	float left = -GenData->GetRootSizeY() / 2.f;
 	UE_LOG(LogTemp, Log, TEXT("Generate Floor for Top - %f, Bottom - %f, Right - %f, Left - %f"), top, bottom, rigth, left);
 	float step = 0;
 	for (float i = bottom; i < top; i+= step)
@@ -132,10 +160,19 @@ void AGenerator::GenerateFloor()
 		for (float j = left; j < rigth; j+= step)
 		{
 			UE_LOG(LogTemp, Log, TEXT("Place x - %f, y - %f"), i, j);
-			FVector vector(i, j, 0);
+			FVector vector(i, j, 0.f);
 			AFloor* floor = GetWorld()->SpawnActor<AFloor>(vector, FRotator::ZeroRotator);
-			step = floor->Init(vector).X * 2;
+			step = floor->Init(vector).X * 2.f;
 		}
 	}
 }
+
+bool AGenerator::isWall(FVector location, AWall** wall)
+{
+	AVisualBox* chackActor = GetWorld()->SpawnActor<AVisualBox>(location, FRotator::ZeroRotator);
+	TArray<AActor*> collisionActors;
+	chackActor->GetOverlappingActors(collisionActors, TSubclassOf<class AWall>());
+	return collisionActors.FindItemByClass<AWall>(wall);
+}
+
 

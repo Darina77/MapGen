@@ -30,10 +30,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void Generate();
+	
 private:
 	void GenerateDoor(AVisualBox * section);
 	void GenerateWalls(AVisualBox * section);
 	void GenerateFloor();
+	bool isWall(FVector location, AWall** wall);
+	void GenerateVerticalWalls(float left, float rigth, const float y);
+	void GenerateHorizontalWalls(float bottom, float top, const float x);
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Generator", meta = (AllowPrivateAccess = "true"))
 		AGenData* GenData;
