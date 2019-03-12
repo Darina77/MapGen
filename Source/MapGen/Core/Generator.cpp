@@ -38,7 +38,7 @@ void AGenerator::Tick(float DeltaTime)
 
 void AGenerator::Generate()
 {
-	//GenerateFloor();
+	GenerateFloor();
 	TQueue<AVisualBox*>* AllSections = GenAlgorithm->GetAllSections();
 	while (!AllSections->IsEmpty())
 	{
@@ -53,18 +53,18 @@ void AGenerator::GenerateVerticalWalls(float left, float rigth, const float y)
 {
 	float border = GenData->GetBorderSize();
 	float step = 50.f;
-
-	for (float j = left; j < rigth; j += step)
+	float endRight = rigth + 5.f;
+	for (float j = left; j < endRight; j += step)
 	{
 		FVector vector(j, y, 0.f);
 		FVector scale;
-		if (j + step > rigth)
+		if (j + step > endRight)
 		{
-			scale.X = ((rigth - j) / step);
+			scale.X = ((endRight - j) / step);
 			scale.Y = border / 10.f;
 			scale.Z = 1.f;
-			step = rigth - j;
-			j = rigth;
+			step = endRight - j;
+			j = endRight;
 		}
 		else 
 		{
