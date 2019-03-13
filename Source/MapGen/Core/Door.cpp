@@ -19,7 +19,7 @@ void ADoor::BeginPlay()
 
 void ADoor::Init(FVector size, FVector location) {
 	BoxComponent->SetBoxExtent(size);
-	BoxComponent->SetWorldLocation(location);
+	BoxComponent->SetWorldLocation(location+size);
 	extension = size;
 }
 

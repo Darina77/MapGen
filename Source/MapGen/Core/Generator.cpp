@@ -44,7 +44,7 @@ void AGenerator::Generate()
 	{
 		AVisualBox* oneSection;
 		AllSections->Dequeue(oneSection);
-		//GenerateDoor(oneSection);
+		GenerateDoor(oneSection);
 		GenerateWalls(oneSection);
 	}
 }
@@ -52,7 +52,7 @@ void AGenerator::Generate()
 void AGenerator::GenerateVerticalWalls(float left, float rigth, const float y)
 {
 	float border = GenData->GetBorderSize();
-	float step = 0.f;
+	float step = 50.f;
 	float endRight = rigth + 5.f;
 	for (float j = left; j < endRight; j += step)
 	{
@@ -73,7 +73,7 @@ void AGenerator::GenerateVerticalWalls(float left, float rigth, const float y)
 			scale.Z = 1.f;
 		}
 
-		FVector chackPlaceTop((vector.X + step / 2), (vector.Y + TAIL_SIZE), vector.Z);
+		FVector chackPlaceTop((vector.X + step / 2.f), (vector.Y + TAIL_SIZE), vector.Z);
 		AWall* collisionWall = NewObject<AWall>(this, TEXT("CollisionWall"));
 		ADoor* collisionDoor = NewObject<ADoor>(this, TEXT("CollisionDoor"));
 		if (isWall(chackPlaceTop, &collisionWall)) {
@@ -81,18 +81,18 @@ void AGenerator::GenerateVerticalWalls(float left, float rigth, const float y)
 			UE_LOG(LogTemp, Log, TEXT("Skip Wall on verical X - %f, Y - %f, Z - %f"), chackPlaceTop.X, chackPlaceTop.Y, chackPlaceTop.Z);
 			FVector collisionExtend;
 			collisionWall->GetCurrentExtension(collisionExtend);
-			step = collisionExtend.X * 2;
+			step = collisionExtend.X * 2.f;
 		}
 		else if (isDoor(chackPlaceTop, &collisionDoor)) {
 			UE_LOG(LogTemp, Log, TEXT("Skip Wall on verical X - %f, Y - %f, Z - %f"), chackPlaceTop.X, chackPlaceTop.Y, chackPlaceTop.Z);
-			FVector collisionExtend;
-			collisionDoor->GetCurrentExtension(collisionExtend);
-			step = collisionExtend.X * 2;
+			FVector collisionExtendDoor;
+			collisionDoor->GetCurrentExtension(collisionExtendDoor);
+			step = collisionExtendDoor.X * 2.f;
 		}
 		else 
 		{
 			AWall* wall = GetWorld()->SpawnActor<AWall>(vector, FRotator::ZeroRotator);
-			step = wall->Init(vector, scale).X * 2;
+			step = wall->Init(vector, scale).X * 2.f;
 		}
 	}
 }
@@ -100,7 +100,7 @@ void AGenerator::GenerateVerticalWalls(float left, float rigth, const float y)
 void AGenerator::GenerateHorizontalWalls(float bottom, float top, const float x)
 {
 	float border = GenData->GetBorderSize();
-	float step = 0.f;
+	float step = 50.f;
 	for (float i = bottom; i < top; i += step)
 	{
 		FVector vector(x, i, 0.f);
@@ -126,19 +126,19 @@ void AGenerator::GenerateHorizontalWalls(float bottom, float top, const float x)
 			UE_LOG(LogTemp, Log, TEXT("Skip Wall on horiz X - %f, Y - %f, Z - %f"), chackPlaceRight.X, chackPlaceRight.Y, chackPlaceRight.Z);
 			FVector collisionExtend;
 			collisionWall->GetCurrentExtension(collisionExtend);
-			step = collisionExtend.Y * 2;
+			step = collisionExtend.Y * 2.f;
 		}
 		else if (isDoor(chackPlaceRight, &collisionDoor))
 		{
 			UE_LOG(LogTemp, Log, TEXT("Skip Wall on horiz X - %f, Y - %f, Z - %f"), chackPlaceRight.X, chackPlaceRight.Y, chackPlaceRight.Z);
-			FVector collisionExtend;
-			collisionDoor->GetCurrentExtension(collisionExtend);
-			step = collisionExtend.Y * 2;
+			FVector collisionExtendDoor;
+			collisionDoor->GetCurrentExtension(collisionExtendDoor);
+			step = collisionExtendDoor.Y * 2.f;
 		}
 		else 
 		{
 			AWall* wall = GetWorld()->SpawnActor<AWall>(vector, FRotator::ZeroRotator);
-			step = wall->Init(vector, scale).Y *2;
+			step = wall->Init(vector, scale).Y *2.f;
 			
 		}
 	}
@@ -171,9 +171,10 @@ void AGenerator::GenerateHorizontalDoor(float bottom, float top, const float x)
 	}
 	else
 	{
-		float doorYPlaceRand = random.FRandRange((bottom + DOOR_SIZE) /TAIL_SIZE, (top- DOOR_SIZE )/TAIL_SIZE);
+		float doorYPlaceRand = random.FRandRange((bottom + DOOR_SIZE*2) /TAIL_SIZE, (top - DOOR_SIZE*2)/TAIL_SIZE);
 		float doorYPlace = doorYPlaceRand*TAIL_SIZE;
-		FVector doorLocation(x, doorYPlace, DOOR_SIZE / 2.f);
+		FVector doorLocation(x, doorYPlace, 0);
+		UE_LOG(LogTemp, Log, TEXT("Generate Door Y - %f. Between bottom - %f, top - %f"), doorYPlace, bottom, top);
 		UE_LOG(LogTemp, Log, TEXT("Generate Door on X - %f, Y - %f, Z - %f"), doorLocation.X, doorLocation.Y, doorLocation.Z);
 		ADoor* door = GetWorld()->SpawnActor<ADoor>(doorLocation, FRotator::ZeroRotator);
 		door->Init(FVector((DOOR_SIZE *( border / TAIL_SIZE)), DOOR_SIZE, DOOR_SIZE), doorLocation);
@@ -192,9 +193,10 @@ void AGenerator::GenerateVerticalDoor(float left, float rigth, const float y)
 	}
 	else
 	{
-		float doorXPlaceRand = random.FRandRange((left + DOOR_SIZE)/ TAIL_SIZE, (rigth - DOOR_SIZE) / TAIL_SIZE);
+		float doorXPlaceRand = random.FRandRange((rigth + DOOR_SIZE*2)/ TAIL_SIZE, (left - DOOR_SIZE*2) / TAIL_SIZE);
 		float doorXPlace = doorXPlaceRand * TAIL_SIZE;
-		FVector doorLocation(doorXPlace, y, DOOR_SIZE / 2);
+		UE_LOG(LogTemp, Log, TEXT("Generate Door X - %f. Between rigth - %f, left - %f"), doorXPlace, rigth, left);
+		FVector doorLocation(doorXPlace, y, 0);
 		UE_LOG(LogTemp, Log, TEXT("Generate Door on X - %f, Y - %f, Z - %f"), doorLocation.X, doorLocation.Y, doorLocation.Z);
 		ADoor* door = GetWorld()->SpawnActor<ADoor>(doorLocation, FRotator::ZeroRotator);
 		door->Init(FVector(DOOR_SIZE, (DOOR_SIZE *(border / TAIL_SIZE)), DOOR_SIZE), doorLocation);
@@ -222,7 +224,7 @@ void AGenerator::GenerateFloor()
 	float rigth = GenData->GetRootSizeY() / 2.f;
 	float left = -GenData->GetRootSizeY() / 2.f;
 	UE_LOG(LogTemp, Log, TEXT("Generate Floor for Top - %f, Bottom - %f, Right - %f, Left - %f"), top, bottom, rigth, left);
-	float step = 0;
+	float step = 50.f;
 	for (float i = bottom; i < top; i+= step)
 	{
 		for (float j = left; j < rigth; j+= step)
