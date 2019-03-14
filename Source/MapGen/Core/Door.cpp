@@ -17,9 +17,15 @@ void ADoor::BeginPlay()
 	
 }
 
-void ADoor::Init(FVector& size, FVector& location) {
+void ADoor::Init(FVector size, FVector location) {
 	BoxComponent->SetBoxExtent(size);
-	BoxComponent->SetWorldLocation(location);
+	BoxComponent->SetWorldLocation(location+size);
+	extension = size;
+}
+
+void ADoor::GetCurrentExtension(FVector & vector)
+{
+	vector = extension;
 }
 
 // Called every frame

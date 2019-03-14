@@ -26,9 +26,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	FVector Init(FVector& vector, FVector& scale);
+	void GetCurrentExtension(FVector& vector);
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Floor", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Wall", meta = (AllowPrivateAccess = "true"))
 		UStaticMesh* WallMesh;
-	UPROPERTY(EditAnywhere, Category = "Floor")
+	UPROPERTY(EditAnywhere, Category = "Wall")
 		UBoxComponent* BoxComponent;
+	UPROPERTY(EditAnywhere, Category = "Wall")
+	FVector MeshExtension;
 };

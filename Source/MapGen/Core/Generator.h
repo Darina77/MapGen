@@ -9,6 +9,7 @@
 #include "GenData.h"
 #include "Floor.h"
 #include "Wall.h"
+#include "Door.h"
 #include "Generator.generated.h"
 
 
@@ -30,17 +31,27 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void Generate();
+	
 private:
 	void GenerateDoor(AVisualBox * section);
 	void GenerateWalls(AVisualBox * section);
+	void GenerateHorizontalDoor(float bottom, float top, const float x);
+	void GenerateVerticalDoor(float left, float rigth, const float y);
 	void GenerateFloor();
+	bool isDoor(FVector location, ADoor ** wall);
+	bool isWall(FVector location, AWall** wall);
+	void GenerateVerticalWalls(float left, float rigth, const float y);
+	void GenerateHorizontalWalls(float bottom, float top, const float x);
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Generator", meta = (AllowPrivateAccess = "true"))
 		AGenData* GenData;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Generator", meta = (AllowPrivateAccess = "true"))
 		AAlgorithmBSP* GenAlgorithm;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlgorithmBSP", meta = (AllowPrivateAccess = "true"))
+		FRandomStream random;
 
-	static const int TAIL_SIZE = 100;
+	 const float TAIL_SIZE = 10.f;
+	 const float DOOR_SIZE = 50.f;
 };
 
 
