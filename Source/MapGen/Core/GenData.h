@@ -23,7 +23,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	UFUNCTION(BlueprintCallable)
 	float GetRootSizeX();
+	UFUNCTION(BlueprintCallable)
 	float GetRootSizeY();
 	int GetRandomSeed();
 	int GetMinSubRoomSize();
