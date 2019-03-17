@@ -23,7 +23,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void Init(FVector size, FVector location);
+	FVector Init(FVector size, FVector location);
 	void GetCurrentExtension(FVector& vector);
 private:
 	UPROPERTY(EditAnywhere, Category = "Door")

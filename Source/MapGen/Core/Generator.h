@@ -33,15 +33,12 @@ public:
 	void Generate();
 	
 private:
-	void GenerateDoor(AVisualBox * section);
 	void GenerateWalls(AVisualBox * section);
-	void GenerateHorizontalDoor(float bottom, float top, const float x);
-	void GenerateVerticalDoor(float left, float rigth, const float y);
 	void GenerateFloor();
 	bool isDoor(FVector location, ADoor ** wall);
 	bool isWall(FVector location, AWall** wall);
-	void GenerateVerticalWalls(float left, float rigth, const float y);
-	void GenerateHorizontalWalls(float bottom, float top, const float x);
+	void GenerateVerticalWalls(float bottom, float top, const float x);
+	void GenerateHorizontalWalls(float left, float rigth, const float y);
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Generator", meta = (AllowPrivateAccess = "true"))
 		AGenData* GenData;
