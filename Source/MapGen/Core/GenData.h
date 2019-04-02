@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Algorithm.h"
 #include "Components/BoxComponent.h"
 #include "GenData.generated.h"
 
@@ -28,10 +29,13 @@ public:
 	int GetRandomSeed();
 	int GetMinSubRoomSize();
 	int GetBorderSize();
+	AAlgorithm* GetAlgorithm();
 private:
 	UPROPERTY(Instanced)
 		UBoxComponent* BoxComponent;
 public:	
+	UPROPERTY(EditAnywhere, Category = "GenData")
+		AAlgorithm* Algorithm;
 	UPROPERTY(EditAnywhere, Category = "GenData")
 		float RoomSizeX;
 	UPROPERTY(EditAnywhere, Category = "GenData")

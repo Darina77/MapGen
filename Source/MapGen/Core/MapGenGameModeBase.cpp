@@ -10,9 +10,8 @@ void AMapGenGameModeBase::BeginPlay()
 		MainStream.Initialize(GenData->GetRandomSeed());
 		
 	
-		Algorithm = GetWorld()->SpawnActor<AAlgorithmBSP>(FVector(0, 0, 0), FRotator::ZeroRotator);
-		Algorithm->Initialize(GenData);
-		Algorithm->Go();
+		Algorithm = GenData->GetAlgorithm();
+		Algorithm->Go(GenData->GetRandomSeed(), GenData->GetBorderSize(), GenData->GetMinSubRoomSize(), GenData->GetRootSizeX(), GenData->GetRootSizeY());
 		
 		Generator = GetWorld()->SpawnActor<AGenerator>(FVector(50, 50, 0), FRotator::ZeroRotator);
 		Generator->Initialize(GenData, Algorithm);

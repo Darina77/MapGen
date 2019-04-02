@@ -17,30 +17,27 @@ void AFloor::BeginPlay()
 	
 }
 
-FVector AFloor::Init(FVector vector)
+FVector AFloor::Init(FVector vector, FVector& scale)
 {
 	FloorMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Plane"));
+	FVector MeshExtend(FloorMesh->GetBoundingBox().GetExtent());
+	MeshExtend *= scale;
+	BoxComponent->SetWorldScale3D(scale);
+	BoxComponent->SetWorldLocation((vector + FVector(MeshExtend.X, MeshExtend.Y, 0)));
+	BoxComponent->SetBoxExtent(MeshExtend);
+
+	UE_LOG(LogTemp, Log, TEXT("New Floor X - %f, Y - %f, Z - %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
+
 	UInstancedStaticMeshComponent* pResult = NewObject<UInstancedStaticMeshComponent>(this, TEXT("Floor"));
-	pResult->RegisterComponent();
 	pResult->SetStaticMesh(FloorMesh);
+	pResult->bEditableWhenInherited = true;
+	pResult->bSelectable = true;
 	pResult->SetFlags(RF_Transactional);
-	this->AddInstanceComponent(pResult);
-	
-	FTransform transform(GetActorLocation());
-	pResult->AddInstance(transform);
+	pResult->RegisterComponent();
 
-	FVector MeshExtent = pResult->CalcBounds(transform).BoxExtent;
-	BoxComponent->SetBoxExtent(MeshExtent);
+	pResult->AddInstance(GetActorTransform());
 
-	UE_LOG(LogTemp, Log, TEXT("Vector before %f %f"), vector.X, vector.Y);
-	vector.X += MeshExtent.X;
-	vector.Y += MeshExtent.Y;
-	FVector in_vector(MeshExtent.X, MeshExtent.Y, 0);
-	BoxComponent->SetWorldLocation(vector);
-	pResult->SetRelativeLocation(in_vector);
-	UE_LOG(LogTemp, Log, TEXT("Vector after %f %f"), vector.X, vector.Y);
-
-	return pResult->CalcBounds(transform).BoxExtent;
+	return MeshExtend;
 }
 
 // Called every frame

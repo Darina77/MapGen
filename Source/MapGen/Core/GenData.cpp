@@ -49,3 +49,8 @@ int AGenData::GetBorderSize()
 {
 	return BorderSize;
 }
+
+AAlgorithm * AGenData::GetAlgorithm()
+{
+	return Algorithm;
+}
