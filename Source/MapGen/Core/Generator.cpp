@@ -60,7 +60,7 @@ void AGenerator::GenerateHorizontalWalls(float left, float rigth, const float y)
 	float mainTop = GenData->GetRootSizeY()/2.f;
 	float mainBottom = -GenData->GetRootSizeY()/2.f;
 	
-	doorXPlaceRand = random.FRandRange((left + DOOR_SIZE * 2), (rigth - DOOR_SIZE * 2));
+	doorXPlaceRand = left+((rigth-left)/2.f);
 	UE_LOG(LogTemp, Log, TEXT("Generate door %f " ), doorXPlaceRand);
 
 	for (float j = left; j < rigth; j += step)
@@ -69,9 +69,10 @@ void AGenerator::GenerateHorizontalWalls(float left, float rigth, const float y)
 		FVector scale;
 		if (j + step > rigth)
 		{
-			scale.X = ((rigth - j) / step);
+			scale.X = ((rigth - j) / step)+0.01f;
 			scale.Y = border / TAIL_SIZE;
 			scale.Z = 1.f;
+			vector.X -= 0.3f;
 			step = rigth - j;
 			j = rigth;
 		}
@@ -131,7 +132,7 @@ void AGenerator::GenerateVerticalWalls(float bottom, float top, const float x)
 	float mainLeft = -GenData->GetRootSizeX() / 2.f;
 	float endTop = top + TAIL_SIZE;
 	
-	doorYPlaceRand = random.FRandRange((bottom + DOOR_SIZE * 2), (top - DOOR_SIZE * 2));
+	doorYPlaceRand = bottom + ((top - bottom) / 2.f);
 	UE_LOG(LogTemp, Log, TEXT("Generate door %f"), doorYPlaceRand);
 	
 
@@ -143,8 +144,9 @@ void AGenerator::GenerateVerticalWalls(float bottom, float top, const float x)
 		if (i + step > endTop)
 		{
 			scale.X = border / TAIL_SIZE;
-			scale.Y = ((endTop - i) / step);
+			scale.Y = ((endTop - i) / step)+0.01f;
 			scale.Z = 1.f;
+			vector.Y -= 0.3f;
 			step = endTop - i;
 			i = endTop;
 		}
@@ -259,7 +261,7 @@ bool AGenerator::isDoor(FVector location, ADoor** wall)
 	AVisualBox* chackActor = GetWorld()->SpawnActor<AVisualBox>(location, FRotator::ZeroRotator);
 	TArray<AActor*> collisionActors;
 	chackActor->GetOverlappingActors(collisionActors, TSubclassOf<class ADoor>());
-	chackActor->Destroy();
+	//chackActor->Destroy();
 	return collisionActors.FindItemByClass<ADoor>(wall);
 }
 
@@ -268,7 +270,7 @@ bool AGenerator::isWall(FVector location, AWall** wall)
 	AVisualBox* chackActor = GetWorld()->SpawnActor<AVisualBox>(location, FRotator::ZeroRotator);
 	TArray<AActor*> collisionActors;
 	chackActor->GetOverlappingActors(collisionActors, TSubclassOf<class AWall>());
-	chackActor->Destroy();
+	//chackActor->Destroy();
 	return collisionActors.FindItemByClass<AWall>(wall);
 }
 

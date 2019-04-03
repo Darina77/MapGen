@@ -27,31 +27,24 @@ void AAgentBaseAlgorithm::Tick(float DeltaTime)
 void AAgentBaseAlgorithm::Go(int RandmSeed, int BorderSize, int MinSubRoomSize, float GetRootSizeX, float GetRootSizeY)
 {
 	random.Initialize(RandmSeed);
-	BounderX = GetRootSizeX / 2;
-	BounderY = GetRootSizeY / 2;
-	run = true;
+	BounderX = GetRootSizeX / 4.0f;
+	BounderY = GetRootSizeY / 4.0f;
 
-	int MinRoomSpace = (BorderSize * 2) + MinSubRoomSize;
+	int MinRoomSpace = (BorderSize * 2.f) + MinSubRoomSize;
 	FVector step;
 	AVisualBox* lastRoom = InitStartRoom(MinRoomSpace);
+	int roomCount = ((GetRootSizeX / MinRoomSpace) * (GetRootSizeY / MinRoomSpace)) * 0.5f;
 
-	for (int i = 0; i < MAX_TRY; ++i)
+	for (int i = 0; i < roomCount; ++i)
 	{
-		run = true;
 		float sizeX = random.FRandRange(MinRoomSpace, BounderX);
 		float sizeY = random.FRandRange(MinRoomSpace, BounderY);
-		AVisualBox* newRoom = GetWorld()->SpawnActor<AVisualBox>(step, FRotator::ZeroRotator);
-		newRoom->Initialize(sizeX, sizeY, 0, 0);
-		step = MakeStep(lastRoom, newRoom);
-		if (run) {
-			newRoom->Initialize(sizeX, sizeY, step.X, step.Y);
+		AVisualBox* newRoom = MakeStep(lastRoom, sizeX, sizeY);
+		if (newRoom)
+		{
 			AllSections.Enqueue(newRoom);
 			lastRoom = newRoom;
 		}
-		else {
-			newRoom->Destroy();
-		}
-		
 	}
 }
 
@@ -68,72 +61,86 @@ AVisualBox* AAgentBaseAlgorithm::InitStartRoom(int MinRoomSpace)
 	return StartBox;
 }
 
-FVector AAgentBaseAlgorithm::MakeStep(AVisualBox* from, AVisualBox* newRoom)
-{
-	
-	int trys = 0;
-	
-	while (trys < MAX_TRY) {
+AVisualBox* AAgentBaseAlgorithm::MakeStep(AVisualBox* from, float sizeX, float sizeY)
+{	
+	for (int trys = 0; trys < MAX_TRY; trys++) {
 		float direction = random.FRandRange(0, 100);
 		UE_LOG(LogTemp, Log, TEXT("Direction %f"), direction);
 		FVector to = from->GetActorLocation();
-		FVector check = to;
+		FVector checkNeibors = to;
+		FVector checkBoxes = to;
 		float stepX = from->getHalfWidth();
 		float stepY = from->getHalfHeight();
-		float newRoomX = newRoom->getHalfWidth();
-		float newRoomY = newRoom->getHalfHeight();
+		float newRoomX = sizeX/2.f;
+		float newRoomY = sizeY/2.f;
+	
 		if (direction <= 25) 
 		{
 			UE_LOG(LogTemp, Log, TEXT("Step top"));//Top
-			to.Y += stepY+ newRoomY;
-			check.Y += to.Y + 2;
+			to.Y += stepY + newRoomY;
+			checkNeibors.Y += stepY + 2.f;
+			checkBoxes.Y = to.Y + 2.f;
 		}
 		else if (direction > 25 && direction <= 50) //Bottom
 		{
 			UE_LOG(LogTemp, Log, TEXT("Step bottom"));
-			to.Y -= stepY+ newRoomY;
-			check.Y -= to.Y + 2;
+			to.Y -= stepY + newRoomY;
+			checkNeibors.Y -= stepY + 2.f;
+			checkBoxes.Y = to.Y - 2.f;
 		}
 		else if (direction > 50 && direction <= 75) //Right
 		{
 			UE_LOG(LogTemp, Log, TEXT("Step right"));
-			to.X += stepX+ newRoomX;
-			check.X += to.X + 2;
+			to.X += stepX + newRoomX;
+			checkNeibors.X += stepX + 2.f;
+			checkBoxes.X = to.X + 2.f;
 		}
 		else if (direction > 75 && direction <= 100) //Left
 		{
 			UE_LOG(LogTemp, Log, TEXT("Step left"));
-			to.X -= stepX+ newRoomX;
-			check.X -= to.X + 2;
+			to.X -= stepX + newRoomX;
+			checkNeibors.X -= stepX + 2.f;
+			checkBoxes.X = to.X - 2.f;
 		}
 
-		UE_LOG(LogTemp, Log, TEXT("Step Vector (%f, %f)"), to.X, to.Y);
-		if ((to.X + newRoomX )<= BounderX && (to.X - newRoomX) >= -BounderX && (to.Y + newRoomY)<= BounderY && (to.Y - newRoomY )>= -BounderY && !isBoxHere(newRoom, check))
+		if (!isNeibors(checkNeibors))
 		{
-			UE_LOG(LogTemp, Log, TEXT("End Vector"));
-			return to;
+			AVisualBox* newRoom = GetWorld()->SpawnActor<AVisualBox>(to, FRotator::ZeroRotator);
+			newRoom->Initialize(sizeX, sizeY, 0, 0);
+			if (!isBoxHere(checkBoxes, newRoom))
+			{
+				newRoom->Initialize(sizeX, sizeY, to.X, to.Y);
+				return newRoom;
+			}
+			else 
+			{
+				newRoom->Destroy();
+			}
 		}
-		else 
-		{
-			trys++;
-		}
+
 	}
 
-	if (trys == MAX_TRY) {
-		run = false;
-	}
-	return from->GetActorLocation();
-}
-
-bool AAgentBaseAlgorithm::isBoxHere(AVisualBox* newRoom, FVector place)
-{
-	TArray<AActor*> collisionActors;
-	newRoom->SetActorLocation(place);
-	newRoom->GetOverlappingActors(collisionActors, TSubclassOf<class AVisualBox>());
-	return collisionActors.FindItemByClass<AVisualBox>();
+	return nullptr;
 }
 
 TQueue<AVisualBox*>* AAgentBaseAlgorithm::GetAllSections()
 {
 	return &AllSections;
+}
+
+bool AAgentBaseAlgorithm::isNeibors(FVector location)
+{
+	AVisualBox* chackActor = GetWorld()->SpawnActor<AVisualBox>(location, FRotator::ZeroRotator);
+	TArray<AActor*> collisionActors;
+	chackActor->GetOverlappingActors(collisionActors, TSubclassOf<class AVisualBox>());
+	chackActor->Destroy();
+	return collisionActors.FindItemByClass<AVisualBox>();
+}
+
+bool AAgentBaseAlgorithm::isBoxHere(FVector location, AVisualBox* newRoom)
+{
+	TArray<AActor*> collisionActors;
+	newRoom->SetActorLocation(location);
+	newRoom->GetOverlappingActors(collisionActors, TSubclassOf<class AVisualBox>());
+	return collisionActors.FindItemByClass<AVisualBox>();
 }

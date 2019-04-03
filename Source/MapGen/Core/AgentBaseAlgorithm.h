@@ -24,10 +24,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void Go(int RandmSeed, int BorderSize, int MinSubRoomSize, float GetRootSizeX, float GetRootSizeY) override;
-	AVisualBox * InitStartRoom(int MinRoomSpace);
-	FVector MakeStep(AVisualBox* from, AVisualBox* newRoom);
-	bool isBoxHere(AVisualBox* newRoom, FVector place);
+	AVisualBox* InitStartRoom(int MinRoomSpace);
+	AVisualBox* MakeStep(AVisualBox* from, float sizeX, float sizeY);
 	virtual TQueue<AVisualBox*>* GetAllSections() override;
+	bool isNeibors(FVector location);
+	bool isBoxHere(FVector location, AVisualBox* newRoom);
 private:
 	// All generated sections
 	TQueue<AVisualBox*> AllSections;
