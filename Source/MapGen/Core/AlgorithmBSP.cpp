@@ -10,11 +10,6 @@ AAlgorithmBSP::AAlgorithmBSP()
 
 }
 
-void AAlgorithmBSP::Initialize(AGenData* OutGenData)
-{
-	GenData = OutGenData;
-}
-
 // Called when the game starts or when spawned
 void AAlgorithmBSP::BeginPlay()
 {
@@ -124,12 +119,12 @@ bool AAlgorithmBSP::Slice(AVisualBox* section, int MinRoomSpace)
 	return false;
 }
 
-void AAlgorithmBSP::Go()
+void AAlgorithmBSP::Go(int RandmSeed, int BorderSize, int MinSubRoomSize, float GetRootSizeX, float GetRootSizeY)
 {
-	InitStartBox();
-	random.Initialize(GenData->GetRandomSeed());
-	int MinRoomSpace = (GenData->GetBorderSize() * 2) + GenData->GetMinSubRoomSize();
-	int roomCount = ((GenData->GetRootSizeX() / MinRoomSpace) * (GenData->GetRootSizeY() / MinRoomSpace)) * 0.5;
+	InitStartBox(GetRootSizeX, GetRootSizeY);
+	random.Initialize(RandmSeed);
+	int MinRoomSpace = (BorderSize * 2) + MinSubRoomSize;
+	int roomCount = ((GetRootSizeX / MinRoomSpace) * (GetRootSizeY / MinRoomSpace)) * 0.5;
 
 	for (int i = 0; i < roomCount; ++i)
 	{
@@ -153,11 +148,11 @@ TQueue<AVisualBox*>* AAlgorithmBSP::GetAllSections()
 	return &AllSections;
 }
 
-void AAlgorithmBSP::InitStartBox()
+void AAlgorithmBSP::InitStartBox(float GetRootSizeX, float GetRootSizeY)
 {
 	
 	FVector Location = GetActorLocation();
 	AVisualBox* MainBox = GetWorld()->SpawnActor<AVisualBox>(FVector(Location.X, Location.Y, 0), FRotator::ZeroRotator);
-	MainBox->Initialize(GenData->GetRootSizeX(), GenData->GetRootSizeY(), Location.X, Location.Y);
+	MainBox->Initialize(GetRootSizeX, GetRootSizeY, Location.X, Location.Y);
 	AllSections.Enqueue(MainBox);
 }

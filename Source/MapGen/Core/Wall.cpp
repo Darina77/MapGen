@@ -36,7 +36,7 @@ FVector AWall::Init(FVector& vector, FVector& scale)
 	FVector MeshExtend(WallMesh->GetBoundingBox().GetExtent());
 	MeshExtend *= scale;
 	BoxComponent->SetWorldScale3D(scale);
-	BoxComponent->SetWorldLocation((vector+MeshExtend));
+	BoxComponent->SetWorldLocation(vector+MeshExtend);
 	BoxComponent->SetBoxExtent(MeshExtend);
 
 	UE_LOG(LogTemp, Log, TEXT("New Wall X - %f, Y - %f, Z - %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);

@@ -85,6 +85,16 @@ float AVisualBox::getBottomBounder()
 	return CenterY - HalfLengthY;
 }
 
+float AVisualBox::getHalfWidth()
+{
+	return HalfLengthX;
+}
+
+float AVisualBox::getHalfHeight()
+{
+	return HalfLengthY;
+}
+
 void AVisualBox::addChild(AVisualBox * box)
 {
 	ChildBoxes.Add(box);

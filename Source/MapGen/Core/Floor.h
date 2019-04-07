@@ -24,10 +24,10 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	FVector Init(FVector vector);
+	FVector Init(FVector vector, FVector& scale);
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Floor", meta = (AllowPrivateAccess = "true"))
-	UStaticMesh* FloorMesh;
+		UStaticMesh* FloorMesh;
 	UPROPERTY(EditAnywhere, Category = "Floor")
 	UBoxComponent* BoxComponent;
 };

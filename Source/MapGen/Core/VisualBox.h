@@ -41,6 +41,8 @@ public:
 	float getLeftBounder();
 	// Give the extents of bottom bounder of section
 	float getBottomBounder();
+	float getHalfWidth();
+	float getHalfHeight();
 	void addChild(AVisualBox* box);
 private:
 	//Painted the section bounds

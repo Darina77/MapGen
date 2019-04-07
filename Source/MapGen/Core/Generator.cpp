@@ -13,12 +13,12 @@ AGenerator::AGenerator()
 	}
 }
 
-void AGenerator::SetAlgorithm(AAlgorithmBSP* Algorithm)
+void AGenerator::SetAlgorithm(AAlgorithm* Algorithm)
 {
 	GenAlgorithm = Algorithm;
 }
 
-void AGenerator::Initialize(AGenData* OutGenData, AAlgorithmBSP* Algorithm)
+void AGenerator::Initialize(AGenData* OutGenData, AAlgorithm* Algorithm)
 {
 	GenData = OutGenData;
 	GenAlgorithm = Algorithm;
@@ -38,12 +38,13 @@ void AGenerator::Tick(float DeltaTime)
 
 void AGenerator::Generate()
 {
-	GenerateFloor();
+	
 	TQueue<AVisualBox*>* AllSections = GenAlgorithm->GetAllSections();
 	while (!AllSections->IsEmpty())
 	{
 		AVisualBox* oneSection;
 		AllSections->Dequeue(oneSection);
+		GenerateFloor(oneSection);
 		GenerateWalls(oneSection);
 	}
 }
@@ -54,16 +55,13 @@ void AGenerator::GenerateHorizontalWalls(float left, float rigth, const float y)
 	float border = GenData->GetBorderSize();
 	float step = 50.f;
 	float doorXPlaceRand = 0;
-	bool isDoorPlace = false;
+
 
 	float mainTop = GenData->GetRootSizeY()/2.f;
 	float mainBottom = -GenData->GetRootSizeY()/2.f;
-	if (y != mainTop && y != mainBottom)
-	{
-		doorXPlaceRand = random.FRandRange((left + DOOR_SIZE * 2), (rigth - DOOR_SIZE * 2));
-		UE_LOG(LogTemp, Log, TEXT("Generate door %f " ), doorXPlaceRand);
-		isDoorPlace = true;
-	}
+	
+	doorXPlaceRand = left+((rigth-left)/2.f);
+	UE_LOG(LogTemp, Log, TEXT("Generate door %f " ), doorXPlaceRand);
 
 	for (float j = left; j < rigth; j += step)
 	{
@@ -71,9 +69,10 @@ void AGenerator::GenerateHorizontalWalls(float left, float rigth, const float y)
 		FVector scale;
 		if (j + step > rigth)
 		{
-			scale.X = ((rigth - j) / step);
+			scale.X = ((rigth - j) / step)+0.01f;
 			scale.Y = border / TAIL_SIZE;
 			scale.Z = 1.f;
+			vector.X -= 0.3f;
 			step = rigth - j;
 			j = rigth;
 		}
@@ -102,13 +101,18 @@ void AGenerator::GenerateHorizontalWalls(float left, float rigth, const float y)
 		}
 		else
 		{
-			if (j <= doorXPlaceRand && doorXPlaceRand <= (j + step) && isDoorPlace)
+			if (j <= doorXPlaceRand && doorXPlaceRand <= (j + step))
 			{
-				UE_LOG(LogTemp, Log, TEXT("Generate Door X - %f. Between rigth - %f, left - %f"), j, rigth, left);
 				FVector doorLocation(j, y, 0);
-				UE_LOG(LogTemp, Log, TEXT("Generate Door on X - %f, Y - %f, Z - %f"), doorLocation.X, doorLocation.Y, doorLocation.Z);
-				ADoor* door = GetWorld()->SpawnActor<ADoor>(doorLocation, FRotator::ZeroRotator);
-				step = door->Init(FVector(DOOR_SIZE, (DOOR_SIZE *(border / TAIL_SIZE)), DOOR_SIZE), doorLocation).X * 2.f;
+				if (isNeedDoorHorizontal(doorLocation)) {
+					UE_LOG(LogTemp, Log, TEXT("Generate Door on X - %f, Y - %f, Z - %f"), doorLocation.X, doorLocation.Y, doorLocation.Z);
+					ADoor* door = GetWorld()->SpawnActor<ADoor>(doorLocation, FRotator::ZeroRotator);
+					step = door->Init(FVector(DOOR_SIZE, (DOOR_SIZE *(border / TAIL_SIZE)), DOOR_SIZE), doorLocation).X * 2.f;
+				}
+				else {
+					AWall* wall = GetWorld()->SpawnActor<AWall>(vector, FRotator::ZeroRotator);
+					step = wall->Init(vector, scale).X * 2.f;
+				}
 			}
 			else {
 				AWall* wall = GetWorld()->SpawnActor<AWall>(vector, FRotator::ZeroRotator);
@@ -123,17 +127,14 @@ void AGenerator::GenerateVerticalWalls(float bottom, float top, const float x)
 	UE_LOG(LogTemp, Log, TEXT("Generate Vertical for Top - %f, Bottom - %f, X - %f"), top, bottom, x);
 	float border = GenData->GetBorderSize();
 	float doorYPlaceRand = -1;
-	bool isDoorPlace = false;
 
 	float mainRight = GenData->GetRootSizeX() / 2.f;
 	float mainLeft = -GenData->GetRootSizeX() / 2.f;
 	float endTop = top + TAIL_SIZE;
-	if (x != mainRight && x != mainLeft)
-	{
-		doorYPlaceRand = random.FRandRange((bottom + DOOR_SIZE * 2), (top - DOOR_SIZE * 2));
-		UE_LOG(LogTemp, Log, TEXT("Generate door %f"), doorYPlaceRand);
-		isDoorPlace = true;
-	}
+	
+	doorYPlaceRand = bottom + ((top - bottom) / 2.f);
+	UE_LOG(LogTemp, Log, TEXT("Generate door %f"), doorYPlaceRand);
+	
 
 	float step = 50.f;
 	for (float i = bottom; i < endTop; i += step)
@@ -143,8 +144,9 @@ void AGenerator::GenerateVerticalWalls(float bottom, float top, const float x)
 		if (i + step > endTop)
 		{
 			scale.X = border / TAIL_SIZE;
-			scale.Y = ((endTop - i) / step);
+			scale.Y = ((endTop - i) / step)+0.01f;
 			scale.Z = 1.f;
+			vector.Y -= 0.3f;
 			step = endTop - i;
 			i = endTop;
 		}
@@ -172,13 +174,19 @@ void AGenerator::GenerateVerticalWalls(float bottom, float top, const float x)
 		}
 		else
 		{
-			if (i <= doorYPlaceRand && doorYPlaceRand <= (i + step) && isDoorPlace)
+			
+			if (i <= doorYPlaceRand && doorYPlaceRand <= (i + step))
 			{
-				UE_LOG(LogTemp, Log, TEXT("Generate Door Y - %f. Between bottom - %f, top - %f"), i, bottom, top);
 				FVector doorLocation(x, i, 0);
-				UE_LOG(LogTemp, Log, TEXT("Generate Door on X - %f, Y - %f, Z - %f"), doorLocation.X, doorLocation.Y, doorLocation.Z);
-				ADoor* door = GetWorld()->SpawnActor<ADoor>(doorLocation, FRotator::ZeroRotator);
-				step = door->Init(FVector((DOOR_SIZE *(border / TAIL_SIZE)), DOOR_SIZE, DOOR_SIZE), doorLocation).Y *2.f;
+				if (isNeedDoorVertical(doorLocation)) {
+					UE_LOG(LogTemp, Log, TEXT("Generate Door on X - %f, Y - %f, Z - %f"), doorLocation.X, doorLocation.Y, doorLocation.Z);
+					ADoor* door = GetWorld()->SpawnActor<ADoor>(doorLocation, FRotator::ZeroRotator);
+					step = door->Init(FVector((DOOR_SIZE *(border / TAIL_SIZE)), DOOR_SIZE, DOOR_SIZE), doorLocation).Y *2.f;
+				}
+				else {
+					AWall* wall = GetWorld()->SpawnActor<AWall>(vector, FRotator::ZeroRotator);
+					step = wall->Init(vector, scale).Y *2.f;
+				}
 
 			}
 			else {
@@ -205,23 +213,46 @@ void AGenerator::GenerateWalls(AVisualBox* section)
 	GenerateHorizontalWalls(left, right, bottom);
 }
 
-void AGenerator::GenerateFloor()
+void AGenerator::GenerateFloor(AVisualBox* section)
 {
-	float top = GenData->GetRootSizeX() / 2.f;
-	float bottom = -GenData->GetRootSizeX() / 2.f;
-	float rigth = GenData->GetRootSizeY() / 2.f;
-	float left = -GenData->GetRootSizeY() / 2.f;
+	float top = section->getTopBounder();
+	float bottom = section->getBottomBounder();
+	float rigth = section->getRigthBounder();
+	float left = section->getLeftBounder();
+
 	UE_LOG(LogTemp, Log, TEXT("Generate Floor for Top - %f, Bottom - %f, Right - %f, Left - %f"), top, bottom, rigth, left);
-	float step = 50.f;
-	for (float i = bottom; i < top; i += step)
+	float stepI = 50.0;
+	for (float i = bottom; i < top; i += stepI)
 	{
-		for (float j = left; j < rigth; j += step)
+		float stepJ = 50.0;
+		FVector scale(1.f, 1.f, 1.f);
+		if (i + stepI > top)
 		{
-			UE_LOG(LogTemp, Log, TEXT("Place x - %f, y - %f"), i, j);
-			FVector vector(i, j, 0.f);
-			AFloor* floor = GetWorld()->SpawnActor<AFloor>(vector, FRotator::ZeroRotator);
-			step = floor->Init(vector).X * 2.f;
+			scale.Y = ((top - i) / stepI)+0.01f;
+			i -= 0.3f;
 		}
+
+		for (float j = left; j < rigth; j += stepJ)
+		{
+			FVector vector(j, i, 0.f);
+			
+			UE_LOG(LogTemp, Log, TEXT("Place x - %f, y - %f"), i, j);
+
+			if (j + stepJ > rigth)
+			{
+				scale.X = ((rigth - j) / stepJ)+0.01f;
+				vector.X -= 0.3f;
+				j = rigth;	
+			}
+			
+			AFloor* floor = GetWorld()->SpawnActor<AFloor>(vector, FRotator::ZeroRotator);
+			FVector res = floor->Init(vector, scale);
+			stepJ = res.X * 2.f;
+			stepI = res.Y * 2.f;
+			
+		}
+
+
 	}
 }
 
@@ -230,6 +261,7 @@ bool AGenerator::isDoor(FVector location, ADoor** wall)
 	AVisualBox* chackActor = GetWorld()->SpawnActor<AVisualBox>(location, FRotator::ZeroRotator);
 	TArray<AActor*> collisionActors;
 	chackActor->GetOverlappingActors(collisionActors, TSubclassOf<class ADoor>());
+	//chackActor->Destroy();
 	return collisionActors.FindItemByClass<ADoor>(wall);
 }
 
@@ -238,7 +270,33 @@ bool AGenerator::isWall(FVector location, AWall** wall)
 	AVisualBox* chackActor = GetWorld()->SpawnActor<AVisualBox>(location, FRotator::ZeroRotator);
 	TArray<AActor*> collisionActors;
 	chackActor->GetOverlappingActors(collisionActors, TSubclassOf<class AWall>());
+	//chackActor->Destroy();
 	return collisionActors.FindItemByClass<AWall>(wall);
 }
 
+bool AGenerator::isNeedDoorVertical(FVector location)
+{
+	AVisualBox* chackActor = GetWorld()->SpawnActor<AVisualBox>(location + FVector(DOOR_SIZE, 0, 0), FRotator::ZeroRotator);
+	TArray<AActor*> collisionActors;
+	chackActor->GetOverlappingActors(collisionActors, TSubclassOf<class AVisualBox>());
 
+	AVisualBox* chackActor1 = GetWorld()->SpawnActor<AVisualBox>(location - FVector(DOOR_SIZE, 0, 0), FRotator::ZeroRotator);
+	TArray<AActor*> collisionActors1;
+	chackActor1->GetOverlappingActors(collisionActors1, TSubclassOf<class AVisualBox>());
+	chackActor->Destroy();
+	chackActor1->Destroy();
+	return collisionActors.FindItemByClass<AVisualBox>() && collisionActors1.FindItemByClass<AVisualBox>();
+}
+
+bool AGenerator::isNeedDoorHorizontal(FVector location)
+{
+	AVisualBox* chackActor = GetWorld()->SpawnActor<AVisualBox>(location + FVector(0, DOOR_SIZE, 0), FRotator::ZeroRotator);
+	TArray<AActor*> collisionActors;
+	chackActor->GetOverlappingActors(collisionActors, TSubclassOf<class AVisualBox>());
+	AVisualBox* chackActor1 = GetWorld()->SpawnActor<AVisualBox>(location - FVector(0, DOOR_SIZE, 0), FRotator::ZeroRotator);
+	TArray<AActor*> collisionActors1;
+	chackActor1->GetOverlappingActors(collisionActors1, TSubclassOf<class AVisualBox>());
+	chackActor->Destroy();
+	chackActor1->Destroy();
+	return collisionActors.FindItemByClass<AVisualBox>() && collisionActors1.FindItemByClass<AVisualBox>();
+}

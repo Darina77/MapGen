@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "GenData.h"
+#include "Algorithm.h"
 #include "Generator.h"
 #include "EngineUtils.h"
 #include "MapGenGameModeBase.generated.h"
@@ -33,7 +34,7 @@ private:
 	AGenerator* Generator;
 
 	UPROPERTY(VisibleAnywhere, Category = "GameMode")
-	AAlgorithmBSP* Algorithm;
+	AAlgorithm* Algorithm;
 
 	UPROPERTY(VisibleAnywhere, Category="GameMode")
 	bool isGenData;
