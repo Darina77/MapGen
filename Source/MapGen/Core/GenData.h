@@ -44,6 +44,6 @@ public:
 		int RandomSeed;
 	UPROPERTY(EditAnywhere, Category = "GenData")
 		int MinSubRoomSize;
-	UPROPERTY(EditAnywhere, Category = "GenData")
-		int BorderSize;
+	//UPROPERTY(EditAnywhere, Category = "GenData")
+		int BorderSize = 2;
 };
