@@ -54,27 +54,23 @@ void AGenerator::GenerateHorizontalWalls(float left, float rigth, const float y)
 	UE_LOG(LogTemp, Log, TEXT("Generate Horizontal for Left - %f, Right - %f, Y - %f"), left, rigth, y);
 	float border = GenData->GetBorderSize();
 	float step = 50.f;
+	float endRight = rigth + 2.f*TAIL_SIZE;
+	float startLeft = left;
 	float doorXPlaceRand = 0;
-
-
-	float mainTop = GenData->GetRootSizeY()/2.f;
-	float mainBottom = -GenData->GetRootSizeY()/2.f;
-	
 	doorXPlaceRand = left+((rigth-left)/2.f);
 	UE_LOG(LogTemp, Log, TEXT("Generate door %f " ), doorXPlaceRand);
 
-	for (float j = left; j < rigth; j += step)
+	for (float j = startLeft; j < endRight; j += step)
 	{
 		FVector vector(j, y, 0.f);
 		FVector scale;
 		if (j + step > rigth)
 		{
-			scale.X = ((rigth - j) / step)+0.01f;
+			scale.X = ((endRight - j) / step);
 			scale.Y = border / TAIL_SIZE;
 			scale.Z = 1.f;
-			vector.X -= 0.3f;
 			step = rigth - j;
-			j = rigth;
+			j = endRight;
 		}
 		else
 		{
@@ -83,7 +79,7 @@ void AGenerator::GenerateHorizontalWalls(float left, float rigth, const float y)
 			scale.Z = 1.f;
 		}
 
-		FVector chackPlaceTop((vector.X + step / 2.f), (vector.Y + TAIL_SIZE), vector.Z);
+		FVector chackPlaceTop((vector.X + border), (vector.Y + TAIL_SIZE), vector.Z);
 		AWall* collisionWall = NewObject<AWall>(this, TEXT("CollisionWall"));
 		ADoor* collisionDoor = NewObject<ADoor>(this, TEXT("CollisionDoor"));
 		if (isWall(chackPlaceTop, &collisionWall)) {
@@ -127,27 +123,24 @@ void AGenerator::GenerateVerticalWalls(float bottom, float top, const float x)
 	UE_LOG(LogTemp, Log, TEXT("Generate Vertical for Top - %f, Bottom - %f, X - %f"), top, bottom, x);
 	float border = GenData->GetBorderSize();
 	float doorYPlaceRand = -1;
-
-	float mainRight = GenData->GetRootSizeX() / 2.f;
-	float mainLeft = -GenData->GetRootSizeX() / 2.f;
-	float endTop = top + TAIL_SIZE;
+	float startBottom = bottom + 2.f*TAIL_SIZE;
+	float endTop = top + border;
 	
 	doorYPlaceRand = bottom + ((top - bottom) / 2.f);
 	UE_LOG(LogTemp, Log, TEXT("Generate door %f"), doorYPlaceRand);
 	
 
 	float step = 50.f;
-	for (float i = bottom; i < endTop; i += step)
+	for (float i = startBottom; i < endTop; i += step)
 	{
 		FVector vector(x, i, 0.f);
 		FVector scale;
-		if (i + step > endTop)
+		if (i + step > top)
 		{
 			scale.X = border / TAIL_SIZE;
-			scale.Y = ((endTop - i) / step)+0.01f;
+			scale.Y = ((endTop - i) / step);
 			scale.Z = 1.f;
-			vector.Y -= 0.3f;
-			step = endTop - i;
+			step = top - i;
 			i = endTop;
 		}
 		else
@@ -156,7 +149,7 @@ void AGenerator::GenerateVerticalWalls(float bottom, float top, const float x)
 			scale.Y = 1.f;
 			scale.Z = 1.f;
 		}
-		FVector chackPlaceRight((vector.X + TAIL_SIZE), (vector.Y + step / 2.f), vector.Z);
+		FVector chackPlaceRight((vector.X + TAIL_SIZE), (vector.Y + border), vector.Z);
 		AWall* collisionWall = NewObject<AWall>(this, TEXT("CollisionWall"));
 		ADoor* collisionDoor = NewObject<ADoor>(this, TEXT("CollisionDoor"));
 		if (isWall(chackPlaceRight, &collisionWall)) {
